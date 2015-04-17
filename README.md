@@ -1,6 +1,6 @@
 # Prometheus label_exporter
 
-[![Build Status](https://travis-ci.org/theClimateCorporation/label_exporter.svg)](https://travis-ci.org/theClimateCorporation/label_exporter)
+[![Build Status](https://travis-ci.org/TheClimateCorporation/label_exporter.svg)](https://travis-ci.org/TheClimateCorporation/label_exporter)
 
 Prometheus exporter to inject/override arbitrary labels on behalf of
 any other exporter.
