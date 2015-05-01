@@ -25,7 +25,7 @@ var (
 			Namespace: "label_exporter",
 			Subsystem: "requests",
 			Name:      "total",
-			Help:      "The number of localhost:port/metrics requests served.",
+			Help:      "The number of localhost:port/path requests served.",
 		},
 		[]string{"code", "port"},
 	)
@@ -80,8 +80,8 @@ func getOverrides(r *http.Request) map[string]string {
 	return updateMap(urlValuesToMap(r.URL.Query()), overrides)
 }
 
-func labelInjectingHandler(w http.ResponseWriter, r *http.Request, port string) {
-	metrics, err := fetchMetricsEndpoint("http://" + *proxyHost + ":" + port + "/metrics")
+func labelInjectingHandler(w http.ResponseWriter, r *http.Request, port string, path string) {
+	metrics, err := fetchMetricsEndpoint("http://" + *proxyHost + ":" + port + path)
 	if err != nil {
 		http.Error(w, "# "+err.Error(), http.StatusServiceUnavailable)
 		processed.WithLabelValues(strconv.Itoa(http.StatusServiceUnavailable), port).Inc()
@@ -148,11 +148,12 @@ func rewriteLabels(match []string, overrides map[string]string) string {
 }
 
 func router(w http.ResponseWriter, r *http.Request) {
-	re, _ := regexp.Compile(`^([0-9]+)/metrics$`)
+	re, _ := regexp.Compile(`^([0-9]+)(/.*)?$`)
 	match := re.FindStringSubmatch(r.URL.Path[1:])
 	if len(match) > 0 {
 		port := match[1]
-		labelInjectingHandler(w, r, port)
+		path := match[2]
+		labelInjectingHandler(w, r, port, path)
 	} else {
 		http.NotFound(w, r)
 	}
