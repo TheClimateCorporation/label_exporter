@@ -142,9 +142,7 @@ func rewriteLabels(match []string, overrides map[string]string) string {
 	labels := string(match[2])
 	value := string(match[3])
 	timestamp := string(match[4])
-	if len(labels) > 1 {
-		labels = getNewLabels(labels, overrides)
-	}
+	labels = getNewLabels(labels, overrides)
 	return name + labels + " " + value + timestamp
 }
 
