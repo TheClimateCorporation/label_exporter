@@ -56,8 +56,14 @@ func fetchMetricsEndpoint(url string) ([]byte, error) {
 }
 
 func getNewLabels(labels string, overrides map[string]string) string {
-	before := labelsToMap(labels)
+	before := make(map[string]string)
+	if len(labels) > 0 {
+		before = labelsToMap(labels)
+	}
 	after := updateMap(before, overrides)
+	if len(after) == 0 {
+		return ""
+	}
 	return labelsToString(after)
 }
 
@@ -142,9 +148,7 @@ func rewriteLabels(match []string, overrides map[string]string) string {
 	labels := string(match[2])
 	value := string(match[3])
 	timestamp := string(match[4])
-	if len(labels) > 1 {
-		labels = getNewLabels(labels, overrides)
-	}
+	labels = getNewLabels(labels, overrides)
 	return name + labels + " " + value + timestamp
 }
 
