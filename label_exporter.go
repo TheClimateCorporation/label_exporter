@@ -61,7 +61,11 @@ func getNewLabels(labels string, overrides map[string]string) string {
 		before = labelsToMap(labels)
 	}
 	after := updateMap(before, overrides)
-	return labelsToString(after)
+	if len(after) == 0 {
+		return ""
+	} else {
+		return labelsToString(after)
+	}
 }
 
 func getOverrides(r *http.Request) map[string]string {
@@ -146,9 +150,6 @@ func rewriteLabels(match []string, overrides map[string]string) string {
 	value := string(match[3])
 	timestamp := string(match[4])
 	labels = getNewLabels(labels, overrides)
-	if labels == "{}" {
-		labels = ""
-	}
 	return name + labels + " " + value + timestamp
 }
 
