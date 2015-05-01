@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"github.com/prometheus/client_golang/prometheus"
 	"io"
@@ -147,12 +148,19 @@ func rewriteLabels(match []string, overrides map[string]string) string {
 	return name + labels + " " + value + timestamp
 }
 
-func router(w http.ResponseWriter, r *http.Request) {
+func getPortPath(path string) (string, string, error) {
 	re, _ := regexp.Compile(`^([0-9]+)(/.*)?$`)
-	match := re.FindStringSubmatch(r.URL.Path[1:])
+	match := re.FindStringSubmatch(path)
 	if len(match) > 0 {
-		port := match[1]
-		path := match[2]
+		return match[1], match[2], nil
+	} else {
+		return "", "", errors.New("Regex parsing of path failed")
+	}
+}
+
+func router(w http.ResponseWriter, r *http.Request) {
+	port, path, err := getPortPath(r.URL.Path[1:])
+	if err == nil {
 		labelInjectingHandler(w, r, port, path)
 	} else {
 		http.NotFound(w, r)
