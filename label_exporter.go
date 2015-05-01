@@ -63,9 +63,8 @@ func getNewLabels(labels string, overrides map[string]string) string {
 	after := updateMap(before, overrides)
 	if len(after) == 0 {
 		return ""
-	} else {
-		return labelsToString(after)
 	}
+	return labelsToString(after)
 }
 
 func getOverrides(r *http.Request) map[string]string {
