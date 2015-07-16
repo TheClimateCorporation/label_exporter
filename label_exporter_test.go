@@ -15,6 +15,18 @@ func TestLabelsToMap(t *testing.T) {
 	if len(m) != 2 {
 		t.Errorf("Expected 2, got %d", len(m))
 	}
+
+	// Labels with comma(s) inside their values
+	m = labelsToMap(`{foo="bar",boo="bear,,,bla"}`)
+	if m["boo"] != "bear,,,bla" {
+		t.Errorf(`Expected "bear,,,bla", got "%v"`, m["boo"])
+	}
+
+	// Labels with equal sign(s) inside their values
+	m = labelsToMap(`{foo="bar",boo="bear===bla"}`)
+	if m["boo"] != "bear===bla" {
+		t.Errorf(`Expected "bear===bla", got "%v"`, m["boo"])
+	}
 }
 
 func TestLabelsToString(t *testing.T) {
