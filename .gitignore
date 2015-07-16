@@ -1,4 +1,5 @@
 .build
+.vagrant
 dependencies*
 label_exporter
 label_exporter.test

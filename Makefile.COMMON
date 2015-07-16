@@ -107,7 +107,7 @@ tag:
 
 .PHONY: test
 test: $(GOCC) dependencies-stamp
-	$(GO) test ./...
+	$(GO) test -test.v ./...
 
 .PHONY: format
 format: $(GOCC)
