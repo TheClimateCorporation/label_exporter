@@ -17,7 +17,11 @@ import (
 	"strings"
 )
 
-const METRIC_LINE_RE = `^([a-zA-Z_][a-zA-Z0-9_:]+)(\{[^{}]+\})? ([^ ]+)( [^ ]+)?$`
+// Regular expressions
+var (
+	LABEL_RE       = regexp.MustCompile(`([^"]+)="([^"]+)",?`)
+	METRIC_LINE_RE = regexp.MustCompile(`^([a-zA-Z_][a-zA-Z0-9_:]+)(\{[^{}]+\})? ([^ ]+)( [^ ]+)?$`)
+)
 
 var (
 	// Metrics
@@ -94,10 +98,9 @@ func labelInjectingHandler(w http.ResponseWriter, r *http.Request, port string, 
 		processed.WithLabelValues(strconv.Itoa(http.StatusServiceUnavailable), port).Inc()
 	} else {
 		lines := strings.Split(string(metrics), "\n")
-		re, _ := regexp.Compile(METRIC_LINE_RE)
 		overrides := getOverrides(r)
 		for idx, line := range lines {
-			io.WriteString(w, processLine(line, idx, re, overrides)+"\n")
+			io.WriteString(w, processLine(line, idx, METRIC_LINE_RE, overrides)+"\n")
 		}
 		processed.WithLabelValues("200", port).Inc()
 	}
@@ -106,9 +109,9 @@ func labelInjectingHandler(w http.ResponseWriter, r *http.Request, port string, 
 func labelsToMap(labels string) map[string]string {
 	_labels := labels[1 : len(labels)-1]
 	m := make(map[string]string)
-	for _, label := range strings.Split(_labels, ",") {
-		p := strings.Split(label, "=")
-		m[p[0]] = p[1][1 : len(p[1])-1]
+	match := LABEL_RE.FindAllStringSubmatch(_labels, -1)
+	for _, group := range match {
+		m[group[1]] = group[2]
 	}
 	return m
 }
