@@ -48,14 +48,15 @@ var (
 	flagset       = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 )
 
-func fetchMetricsEndpoint(url string) ([]byte, error) {
+func fetchMetricsEndpoint(url string) ([]byte, http.Header, error) {
 	var metrics []byte
 	resp, err := http.Get(url)
 	if err != nil {
-		return metrics, err
+		return metrics, nil, err
 	} else {
 		defer resp.Body.Close()
-		return ioutil.ReadAll(resp.Body)
+		metrics, err := ioutil.ReadAll(resp.Body)
+		return metrics, resp.Header, err
 	}
 }
 
@@ -92,11 +93,17 @@ func getOverrides(r *http.Request) map[string]string {
 }
 
 func labelInjectingHandler(w http.ResponseWriter, r *http.Request, port string, path string) {
-	metrics, err := fetchMetricsEndpoint("http://" + *proxyHost + ":" + port + path)
+	metrics, header, err := fetchMetricsEndpoint("http://" + *proxyHost + ":" + port + path)
 	if err != nil {
 		http.Error(w, "# "+err.Error(), http.StatusServiceUnavailable)
 		processed.WithLabelValues(strconv.Itoa(http.StatusServiceUnavailable), port).Inc()
 	} else {
+		for k, v := range header {
+			if k != "Content-Length" {
+				w.Header().Set(k, strings.Join(v, ";"))
+			}
+		}
+		w.Header().Set("Via", "https://github.com/TheClimateCorporation/label_exporter")
 		lines := strings.Split(string(metrics), "\n")
 		overrides := getOverrides(r)
 		for idx, line := range lines {
