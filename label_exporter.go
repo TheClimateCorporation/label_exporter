@@ -43,6 +43,7 @@ var (
 
 	// Command line flags
 	listenAddress = flag.String("web.listen-address", ":9900", "Address to listen on")
+	acceptPrefix  = flag.String("accept.prefix", "", "Accept header prefix to be used")
 	proxyHost     = flag.String("proxy-host", "localhost", "Host to proxy requests against")
 	labelsDir     = flag.String("labels-dir", "/tmp/target", "Directory to find *.label in")
 	flagset       = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
@@ -52,7 +53,7 @@ func fetchMetricsEndpoint(url string, r *http.Request) ([]byte, http.Header, err
 	var metrics []byte
 	var client = &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Accept", r.Header.Get("Accept"))
+	req.Header.Set("Accept", *acceptPrefix+r.Header.Get("Accept"))
 	resp, err := client.Do(req)
 	if err != nil {
 		return metrics, nil, err
