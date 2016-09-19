@@ -19,7 +19,7 @@ import (
 
 // Regular expressions
 var (
-	LABEL_RE       = regexp.MustCompile(`([^"]+)="([^"]+)",?`)
+	LABEL_RE       = regexp.MustCompile(`([^"]+)="([^"]*)",?`)
 	METRIC_LINE_RE = regexp.MustCompile(`^([a-zA-Z_][a-zA-Z0-9_:]+)(\{[^{}]+\})? ([^ ]+)( [^ ]+)?$`)
 )
 
