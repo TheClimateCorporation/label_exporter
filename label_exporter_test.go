@@ -82,3 +82,13 @@ func TestGetNewLabelsWithoutLabelsOrOverrides(t *testing.T) {
 		t.Errorf("Expected %v, got %v", expected, labels)
 	}
 }
+
+func TestGetNewLabelsWithEmptyLabelValue(t *testing.T) {
+	labelsString := `{foo="",boo="bear"}`
+	overrides := make(map[string]string)
+	labels := getNewLabels(labelsString, overrides)
+	expected := `{boo="bear",foo=""}`
+	if labels != expected {
+		t.Errorf("Expected %v, got %v", expected, labels)
+	}
+}
